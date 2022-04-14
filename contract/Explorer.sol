@@ -48,7 +48,9 @@ contract ExplorerSupply is ERC1155, IERC721Receiver, Ownable {
         return IERC721Receiver.onERC721Received.selector;
     }
 
-    function createToken() public onlyOwner {
+    function createToken() public onlyOwner returns (uint) {
         ExplorerToken(NFT).createToken();
+
+        return 0;
     }
 }
