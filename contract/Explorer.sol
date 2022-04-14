@@ -3,10 +3,10 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-contract ExplorerToken is ERC721, Ownable {
+contract ExplorerToken is ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     
