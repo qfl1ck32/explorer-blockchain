@@ -1,46 +1,40 @@
-import Web3 from "web3";
-import ganache from "ganache";
+// import Web3 from "web3";
+
+const Web3 = require('web3');
 
 import { config } from "dotenv";
 
-import { ABI, ABI_2 } from "./contract/ABI";
+import { SUPPLY_ABI, TOKEN_ABI } from "./contract/ABI";
 
 config();
 
-const address = "0x48352b63800a3577B5037d2e7D6cA4fb1E441553";
+const address = "0x2115e86d7Fd859905F3Dd8b450139092a108C8F2";
 
 const web3 = new Web3(Web3.givenProvider || process.env.GANACHE_SERVER_URL);
 
 const main = async () => {
-  const contract = new web3.eth.Contract(ABI, address);
+  const supplyContract = new web3.eth.Contract(SUPPLY_ABI, address);
 
-  const accounts = await web3.eth.getAccounts();
+  const token = await supplyContract.methods.ownedToken().call();
 
-  const token = await contract.methods.ownedToken().call();
+  const tokenContract = new web3.eth.Contract(TOKEN_ABI, token);
 
-  const tokenContract = new web3.eth.Contract(ABI_2, token);
-
-  //   const reason = web3.utils.toAscii(
-  //     "0xd34b07a9832ce731a7723daafeec7512b0c43634e8c879f01981e34e56fa3f54"
-  //   );
-
-  //   console.log(reason);
-
-  //   return;
+  const lat = 39866;
+  const long = -70200;
+  const name = 'Atlantis';
 
   try {
-    const result = await contract.methods
-      .createToken()
-      .send({ from: "0xFF35B71924C9b97884aC2905fe37769B3ABf4a0D" });
-
-    console.log(await tokenContract.methods.totalSupply().call());
+    const gasCost = await supplyContract.methods.createToken(lat, long, name).estimateGas({ from: '0xA3778D82E01C557E8E83fbf00A082187308De5d5' });
+    console.log(gasCost);
+    await supplyContract.methods
+      .createToken(lat, long, name)
+      .send({ from: '0xA3778D82E01C557E8E83fbf00A082187308De5d5', gas: gasCost });
+    const totalSupply = await tokenContract.methods.totalSupply().call();
+    console.log(totalSupply);
+    console.log(await tokenContract.methods.getLocation(totalSupply).call());
   } catch (err) {
     console.log({ err });
   }
-
-  //   console.log(token);
-
-  //   console.log(JSON.stringify(token));
 };
 
 main();

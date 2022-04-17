@@ -9,18 +9,44 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 contract ExplorerToken is ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
-    
+
+    struct Location {
+        int24 latitude;
+        int24 longitude;
+        string name;
+    }
+
+    mapping(int24 => mapping(int24 => bool)) _coords;
+
+    mapping(uint256 => Location) _places;
+
     constructor() ERC721("Explorer", "EXP") {}
 
-    function createToken() external onlyOwner
-        returns (uint256)
-    {
+    function createToken(
+        int24 latitude,
+        int24 longitude,
+        string memory name
+    ) external onlyOwner returns (uint256) {
+        require(
+            _coords[latitude][longitude] == false,
+            "This location has already been registered!"
+        );
+        
         _tokenIds.increment();
+        uint256 locationId = _tokenIds.current();
+        _safeMint(this.owner(), locationId);
+        _places[locationId] = Location(latitude, longitude, name);
+        _coords[latitude][longitude] = true;
+        return locationId;
+    }
 
-        uint256 newLocationId = _tokenIds.current();
-        _safeMint(this.owner(), newLocationId);
-
-        return newLocationId;
+    function getLocation(uint256 tokenId)
+        public
+        view
+        returns (Location memory)
+    {
+        _exists(tokenId);
+        return _places[tokenId];
     }
 }
 
@@ -32,8 +58,7 @@ contract ExplorerSupply is ERC1155, IERC721Receiver, Ownable {
         NFT = address(_NFT);
     }
 
-    function ownedToken() view external returns (address _NFT)
-    {
+    function ownedToken() external view returns (address _NFT) {
         return NFT;
     }
 
@@ -42,15 +67,17 @@ contract ExplorerSupply is ERC1155, IERC721Receiver, Ownable {
         address from,
         uint256 tokenId,
         bytes calldata data
-    ) external override returns (bytes4)
-    {
+    ) external override returns (bytes4) {
         _mint(this.owner(), tokenId, 128, data);
         return IERC721Receiver.onERC721Received.selector;
     }
 
-    function createToken() public onlyOwner returns (uint) {
-        ExplorerToken(NFT).createToken();
-
+    function createToken(
+        int24 latitude,
+        int24 longitude,
+        string memory name
+    ) public onlyOwner returns (uint256) {
+        ExplorerToken(NFT).createToken(latitude, longitude, name);
         return 0;
     }
 }

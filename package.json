@@ -4,5 +4,9 @@
     "dotenv": "^16.0.0",
     "ganache": "^7.0.4",
     "web3": "^1.7.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15",
+    "ts-node": "^10.7.0"
   }
 }
