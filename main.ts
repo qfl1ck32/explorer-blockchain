@@ -1,6 +1,4 @@
-// import Web3 from "web3";
-
-const Web3 = require('web3');
+import Web3 from "web3";
 
 import { config } from "dotenv";
 
@@ -8,7 +6,7 @@ import { SUPPLY_ABI, TOKEN_ABI } from "./contract/ABI";
 
 config();
 
-const address = "0x2115e86d7Fd859905F3Dd8b450139092a108C8F2";
+const address = "0xA5D65839675eD6DFe79620167D1242D41F381BEE";
 
 const web3 = new Web3(Web3.givenProvider || process.env.GANACHE_SERVER_URL);
 
@@ -17,21 +15,35 @@ const main = async () => {
 
   const token = await supplyContract.methods.ownedToken().call();
 
+  console.log("wtf?");
+
   const tokenContract = new web3.eth.Contract(TOKEN_ABI, token);
 
   const lat = 39866;
   const long = -70200;
-  const name = 'Atlantis';
+  const name = "Atlantis";
+
+  const from = "0x555547358A4B7e1c2aeb43278099b219E6EB8715";
 
   try {
-    const gasCost = await supplyContract.methods.createToken(lat, long, name).estimateGas({ from: '0xA3778D82E01C557E8E83fbf00A082187308De5d5' });
-    console.log(gasCost);
-    await supplyContract.methods
+    const gasCost = await supplyContract.methods
       .createToken(lat, long, name)
-      .send({ from: '0xA3778D82E01C557E8E83fbf00A082187308De5d5', gas: gasCost });
+      .estimateGas({ from });
+
+    console.log({ gasCost });
+
+    await supplyContract.methods.createToken(lat, long, name).send({
+      from,
+      gas: gasCost,
+    });
+
     const totalSupply = await tokenContract.methods.totalSupply().call();
-    console.log(totalSupply);
-    console.log(await tokenContract.methods.getLocation(totalSupply).call());
+
+    console.log({ totalSupply });
+
+    console.log({
+      location: await tokenContract.methods.getLocation(totalSupply).call(),
+    });
   } catch (err) {
     console.log({ err });
   }
