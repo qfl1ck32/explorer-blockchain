@@ -1,3 +1,4 @@
 node_modules/*
 contract/.deps/*
 contract/artifacts/*
+doc.tex
