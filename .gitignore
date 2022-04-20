@@ -1,4 +1,6 @@
 node_modules/*
 contract/.deps/*
 contract/artifacts/*
-doc.tex
+doc.*
+!doc.pdf
+sol_highlight*
